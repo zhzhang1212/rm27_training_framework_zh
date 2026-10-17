@@ -126,14 +126,14 @@ ThreadX 中数字越小，优先级越高：
 
 ### 6. tick 和周期
 
-当前配置为每秒 100 tick：
+当前配置为每秒 1000 tick：
 
 ```text
-1 tick = 10 ms
-tx_thread_sleep(1) 约等于休眠 10 ms
+1 tick = 1 ms
+tx_thread_sleep(1) 约等于休眠 1 ms
 ```
 
-当前 control 线程每 1 tick 执行一次，频率约为 100 Hz；每 10 个周期检查一次电机在线状态，约为 100 ms。
+当前 control 线程每 1 tick 执行一次，频率约为 1000 Hz；每 10 个周期检查一次电机在线状态，约为 10 ms。
 
 修改线程周期后需要重新检查 PID 参数，因为当前 PID 没有显式使用 `dt`。
 
@@ -170,7 +170,7 @@ Entry：执行线程的周期任务
 | IMU | 初始化并读取 BMI088 |
 | Alive | 使用信号量监控各线程并控制 LED 状态 |
 
-当前只有最小 control 线程投入运行，电机在线检查暂时也在 control 线程中。IMU、独立 Alive 线程和信号量后续再实现。
+当前启用了最小 Alive 和 IMU 线程，Control 线程尚未启动。Alive 线程目前只负责绿色 LED 存活指示，信号量监控后续再实现。
 
 ### 9. 中断与线程
 
