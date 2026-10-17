@@ -65,7 +65,7 @@
 @
 @
 SYSTEM_CLOCK      =   168000000
-SYSTICK_CYCLES    =   ((SYSTEM_CLOCK / 100) -1)
+SYSTICK_CYCLES    =   ((SYSTEM_CLOCK / 1000) -1)
 
     .text 32
     .align 4
@@ -151,7 +151,7 @@ _tx_initialize_low_level:
     ORR     r1, r1, #1                              @ Set the CYCCNTENA bit
     STR     r1, [r0]                                @ Enable the cycle count register
 @
-@    /* Configure SysTick for 100Hz clock, or 16384 cycles if no reference.  */
+@    /* Configure SysTick for 1000Hz clock, or 16384 cycles if no reference.  */
 @
     MOV     r0, #0xE000E000                         @ Build address of NVIC registers
     LDR     r1, =SYSTICK_CYCLES
@@ -279,7 +279,7 @@ __tx_DBGHandler:
 ;
 ;
 SYSTEM_CLOCK      EQU   168000000
-SYSTICK_CYCLES    EQU   ((SYSTEM_CLOCK / 100) -1)
+SYSTICK_CYCLES    EQU   ((SYSTEM_CLOCK / 1000) -1)
 
 #ifdef USE_DYNAMIC_MEMORY_ALLOCATION
     RSEG    FREE_MEM:DATA
@@ -463,7 +463,7 @@ SysTick_Handler:
 @
 
 SYSTEM_CLOCK      =   168000000
-SYSTICK_CYCLES    =   ((SYSTEM_CLOCK / 100) -1)
+SYSTICK_CYCLES    =   ((SYSTEM_CLOCK / 1000) -1)
 
     .text 32
     .align 4
@@ -552,7 +552,7 @@ _tx_initialize_low_level:
     ORR     r1, r1, #1                              @ Set the CYCCNTENA bit
     STR     r1, [r0]                                @ Enable the cycle count register
 @
-@    /* Configure SysTick for 100Hz clock, or 16384 cycles if no reference.  */
+@    /* Configure SysTick for 1000Hz clock, or 16384 cycles if no reference.  */
 @
     MOV     r0, #0xE000E000                         @ Build address of NVIC registers
     LDR     r1, =SYSTICK_CYCLES

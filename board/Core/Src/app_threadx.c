@@ -63,7 +63,11 @@ UINT App_ThreadX_Init(VOID *memory_ptr)
   TX_BYTE_POOL *byte_pool = (TX_BYTE_POOL*)memory_ptr;
 
   /* USER CODE BEGIN App_ThreadX_Init */
-  ret = ControlThread_Init(byte_pool);
+  ret = AliveThread_Init(byte_pool);
+  if (ret == TX_SUCCESS)
+  {
+    ret = ImuThread_Init(byte_pool);
+  }
   /* USER CODE END App_ThreadX_Init */
 
   return ret;
