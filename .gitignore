@@ -2,3 +2,6 @@
 /build/
 /board/build/
 
+# 本机 VS Code 配置
+/.vscode/
+
