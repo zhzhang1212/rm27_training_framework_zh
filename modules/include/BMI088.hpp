@@ -17,9 +17,6 @@ enum BMI088_SENSOR
     BMI088_CS_GYRO = 1,
 };
 
-/*---------------------------硬件连接---------------------------*/
-// TODO: 配置 BMI088 使用的 SPI 句柄，以及加速度计和陀螺仪各自的 GPIO 片选端口、引脚。
-
 #define HEATING_RESISTANCE_TIM htim10            //< 加热电阻定时器
 #define HEATING_RESISTANCE_CHANNEL TIM_CHANNEL_1 //< 加热电阻通道
 
@@ -183,7 +180,7 @@ enum BMI088_SENSOR
          * @param data 数据
          * @param len 数据长度
          */
-        void ReadReg(enum BMI088_SENSOR cs, uint8_t addr, uint8_t *data, uint8_t len);
+        bool ReadReg(enum BMI088_SENSOR cs, uint8_t addr, uint8_t *data, uint8_t len);
 
         /**
          * @brief 写数据到寄存器
@@ -192,7 +189,7 @@ enum BMI088_SENSOR
          * @param data 数据
          * @param len 数据长度
          */
-        void WriteReg(enum BMI088_SENSOR cs, uint8_t addr, uint8_t *data, uint8_t len);
+        bool WriteReg(enum BMI088_SENSOR cs, uint8_t addr, uint8_t *data, uint8_t len);
 
         void Config() override;
         void Calibrate() override;
@@ -211,7 +208,7 @@ enum BMI088_SENSOR
 
 
     private:
-        float Gyro_offset[3]; // 陀螺仪零飘
+        float Gyro_offset[3]{}; // 陀螺仪零飘
     };
 
 }
