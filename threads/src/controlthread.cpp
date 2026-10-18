@@ -6,10 +6,15 @@
 
 namespace
 {
-constexpr ULONG CONTROL_THREAD_STACK_SIZE = 768U; //栈大小
-constexpr UINT CONTROL_THREAD_PRIORITY = 5U; //优先级，数字越小优先级越高
-constexpr ULONG CONTROL_PERIOD_TICKS = 1U;
+constexpr ULONG CONTROL_THREAD_STACK_SIZE = 768U;
+constexpr UINT CONTROL_THREAD_PRIORITY = 5U;
+constexpr ULONG CONTROL_PERIOD_TICKS = TX_TIMER_TICKS_PER_SECOND / 1000U;
+constexpr ULONG CONTROL_HEARTBEAT_PERIOD_TICKS = TX_TIMER_TICKS_PER_SECOND / 10U;
 constexpr uint32_t ALIVE_CHECK_PERIODS = 10U;
+constexpr bool CONTROL_OUTPUT_ENABLED = false; //暂时关闭control线程的输出功能，避免在没有电机的情况下发送CAN报文
+
+static_assert(CONTROL_PERIOD_TICKS > 0U, "control线程周期必须至少为一个ThreadX tick");
+static_assert(CONTROL_HEARTBEAT_PERIOD_TICKS > 0U, "control心跳周期必须至少为一个ThreadX tick");
 
 TX_THREAD control_thread;
 CHAR control_thread_name[] = "control";
@@ -17,20 +22,37 @@ M2006 motor;
 
 void ControlThreadEntry(ULONG)
 {
-    auto *handler = DJIMotorHandler::Instance();
+    ULONG last_heartbeat_tick = tx_time_get();
     uint32_t alive_counter = 0;
+    (void)AliveThread_ReportControl();
 
     while (true)
     {
-        if (++alive_counter >= ALIVE_CHECK_PERIODS)
+        if constexpr (CONTROL_OUTPUT_ENABLED)
         {
-            handler->AllMotorAliveCheck();
-            alive_counter = 0;
+            auto *handler = DJIMotorHandler::Instance();
+            if (++alive_counter >= ALIVE_CHECK_PERIODS)
+            {
+                handler->AllMotorAliveCheck();
+                alive_counter = 0;
+            }
+
+            motor.setOutput();
+            if (handler->sendControlData() != HAL_OK)
+            {
+                motor.controlMode = DJIMotor::RELAX_MODE;
+                motor.currentSet = 0;
+            }
         }
 
-        motor.setOutput(); 
-        handler->sendControlData(); // 发送控制数据到电机
-        tx_thread_sleep(CONTROL_PERIOD_TICKS); // 休眠一段时间，控制周期为1ms
+        const ULONG now = tx_time_get();
+        if ((now - last_heartbeat_tick) >= CONTROL_HEARTBEAT_PERIOD_TICKS)
+        {
+            (void)AliveThread_ReportControl();
+            last_heartbeat_tick = now;
+        }
+
+        tx_thread_sleep(CONTROL_PERIOD_TICKS);
     }
 }
 }
@@ -53,8 +75,15 @@ extern "C" UINT ControlThread_Init(TX_BYTE_POOL *byte_pool)
         return status;
     }
 
-    CAN_Init();
-    DJIMotorHandler::Instance()->registerMotor(&motor, &hcan1, 0x201U);
+    if constexpr (CONTROL_OUTPUT_ENABLED)
+    {
+        if (!CAN_Init())
+        {
+            (void)tx_byte_release(stack);
+            return TX_NOT_AVAILABLE;
+        }
+        DJIMotorHandler::Instance()->registerMotor(&motor, &hcan1, 0x201U);
+    }
 
     status = tx_thread_create(
         &control_thread,

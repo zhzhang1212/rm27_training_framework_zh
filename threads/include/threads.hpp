@@ -15,6 +15,10 @@ UINT AliveThread_Init(TX_BYTE_POOL *byte_pool);
 UINT ImuThread_Init(TX_BYTE_POOL *byte_pool);
 UINT ControlThread_Init(TX_BYTE_POOL *byte_pool);
 
+UINT AliveThread_ReportInitialization(void);
+UINT AliveThread_ReportImu(void);
+UINT AliveThread_ReportControl(void);
+
 #ifdef __cplusplus
 }
 #endif
