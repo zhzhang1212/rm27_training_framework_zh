@@ -8,34 +8,38 @@
 #include "tim.h"
 
 /**
- * @brief  PWM初始化
+ * @brief 将已由 CubeMX 初始化的 PWM 通道置零并启动
+ * @return 两个通道均成功启动时返回 true
  */
-void PWM_Init(void);
+bool PWM_Init(void);
 
 /**
- * @brief  PWM启动，只是对HAL库函数的形式上的封装
+ * @brief 启动指定 PWM 通道
+ * @return 启动成功时返回 true
  */
-void PWM_Start(TIM_HandleTypeDef *htim, uint32_t Channel);
+bool PWM_Start(TIM_HandleTypeDef *htim, uint32_t channel);
 
 /**
- * @brief  PWM停止，只是对HAL库函数的形式上的封装
+ * @brief 停止指定 PWM 通道
+ * @return 停止成功时返回 true
  */
-void PWM_Stop(TIM_HandleTypeDef *htim, uint32_t Channel);
+bool PWM_Stop(TIM_HandleTypeDef *htim, uint32_t channel);
 
 /**
- * @brief  设置PWM周期
- * @param  htim: 定时器句柄
- * @param  period: 周期，单位为秒
- * 只是对HAL库函数的形式上的封装
+ * @brief 设置 PWM 周期
+ * @param htim 定时器句柄
+ * @param period_s 周期，单位为秒
+ * @return 参数有效且周期设置成功时返回 true
  */
-void PWM_SetPeriod(TIM_HandleTypeDef *htim, float period);
+bool PWM_SetPeriod(TIM_HandleTypeDef *htim, float period_s);
 
 /**
- * @brief  设置PWM占空比
- * @param  htim: 定时器句柄
- * @param  dutyratio: 占空比，0~1
- * 只是对HAL库函数的形式上的封装
+ * @brief 设置 PWM 占空比
+ * @param htim 定时器句柄
+ * @param duty_ratio 占空比，范围为 [0, 1]
+ * @param channel 定时器通道
+ * @return 参数有效且比较值设置成功时返回 true
  */
-void PWM_SetDutyRatio(TIM_HandleTypeDef *htim, float dutyratio, uint32_t channel);
+bool PWM_SetDutyRatio(TIM_HandleTypeDef *htim, float duty_ratio, uint32_t channel);
 
 #endif //RM26_H7_BSP_PWM_HPP
