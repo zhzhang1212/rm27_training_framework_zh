@@ -1,0 +1,22 @@
+# 默认自动识别文本文件并进行换行符规范化。
+* text=auto
+.gitattributes text eol=lf
+
+# C/C++ 源码统一使用 LF。
+*.c text eol=lf
+*.h text eol=lf
+*.cc text eol=lf
+*.cpp text eol=lf
+*.cxx text eol=lf
+*.hh text eol=lf
+*.hpp text eol=lf
+*.hxx text eol=lf
+
+# 汇编源码统一使用 LF。
+*.s text eol=lf
+*.S text eol=lf
+*.asm text eol=lf
+
+# 项目文档统一使用 LF。
+*.md text eol=lf
+*.txt text eol=lf

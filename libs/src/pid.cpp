@@ -49,7 +49,7 @@ void PID::UpdateResult()
         return;
     }
 
-    result = Numeric::LimitABS(result, outputLimit);
+    result = Numeric::LimitABS(result, outputLimit); // 限制输出范围
 }
 
 void PID::Clear()
