@@ -36,8 +36,9 @@ public:
 
     /**
      * @brief 发送控制数据
+     * @return CAN发送状态，全部发送成功时返回HAL_OK
      */
-    void sendControlData();
+    HAL_StatusTypeDef sendControlData();
 
     /**
      * @brief 处理并更新电机反馈数据

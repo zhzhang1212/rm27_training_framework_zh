@@ -45,7 +45,7 @@ void DJIMotorHandler::registerMotor(DJIMotor *motor, CAN_HandleTypeDef *hcan, ui
     }
 }
 
-void DJIMotorHandler::sendControlData()
+HAL_StatusTypeDef DJIMotorHandler::sendControlData()
 {
     for (int i = 0; i < 8; ++i)
     {
@@ -82,10 +82,38 @@ void DJIMotorHandler::sendControlData()
         }
     }
 
-    if (CAN1_0x200_Exist) CAN_Transmit(&hcan1, 0x200U, can1_send_data_0, 8);
-    if (CAN1_0x1FF_Exist) CAN_Transmit(&hcan1, 0x1FFU, can1_send_data_1, 8);
-    if (CAN2_0x200_Exist) CAN_Transmit(&hcan2, 0x200U, can2_send_data_0, 8);
-    if (CAN2_0x1FF_Exist) CAN_Transmit(&hcan2, 0x1FFU, can2_send_data_1, 8);
+    HAL_StatusTypeDef status = HAL_OK;
+
+    if (CAN1_0x200_Exist)
+    {
+        status = CAN_Transmit(&hcan1, 0x200U, can1_send_data_0, 8U);
+    }
+    if (CAN1_0x1FF_Exist)
+    {
+        const HAL_StatusTypeDef current_status = CAN_Transmit(&hcan1, 0x1FFU, can1_send_data_1, 8U);
+        if (status == HAL_OK)
+        {
+            status = current_status;
+        }
+    }
+    if (CAN2_0x200_Exist)
+    {
+        const HAL_StatusTypeDef current_status = CAN_Transmit(&hcan2, 0x200U, can2_send_data_0, 8U);
+        if (status == HAL_OK)
+        {
+            status = current_status;
+        }
+    }
+    if (CAN2_0x1FF_Exist)
+    {
+        const HAL_StatusTypeDef current_status = CAN_Transmit(&hcan2, 0x1FFU, can2_send_data_1, 8U);
+        if (status == HAL_OK)
+        {
+            status = current_status;
+        }
+    }
+
+    return status;
 }
 
 void DJIMotorHandler::updateFeedback(CAN_HandleTypeDef *hcan, uint8_t *rx_data, int index)

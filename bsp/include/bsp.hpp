@@ -5,12 +5,13 @@
 #ifndef RM26_BSP_HPP
 #define RM26_BSP_HPP
 
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern  "C" {
 #endif
 
-    void bsp_Init(void);
+    bool bsp_Init(void);
 
 #ifdef __cplusplus
 }
