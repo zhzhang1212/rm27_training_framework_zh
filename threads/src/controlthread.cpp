@@ -11,7 +11,6 @@ constexpr UINT CONTROL_THREAD_PRIORITY = 5U;
 constexpr ULONG CONTROL_PERIOD_TICKS = TX_TIMER_TICKS_PER_SECOND / 1000U;
 constexpr ULONG CONTROL_HEARTBEAT_PERIOD_TICKS = TX_TIMER_TICKS_PER_SECOND / 10U;
 constexpr uint32_t ALIVE_CHECK_PERIODS = 10U;
-constexpr bool CONTROL_OUTPUT_ENABLED = false; //暂时关闭control线程的输出功能，避免在没有电机的情况下发送CAN报文
 
 static_assert(CONTROL_PERIOD_TICKS > 0U, "control线程周期必须至少为一个ThreadX tick");
 static_assert(CONTROL_HEARTBEAT_PERIOD_TICKS > 0U, "control心跳周期必须至少为一个ThreadX tick");
@@ -28,21 +27,18 @@ void ControlThreadEntry(ULONG)
 
     while (true)
     {
-        if constexpr (CONTROL_OUTPUT_ENABLED)
+        auto *handler = DJIMotorHandler::Instance();
+        if (++alive_counter >= ALIVE_CHECK_PERIODS)
         {
-            auto *handler = DJIMotorHandler::Instance();
-            if (++alive_counter >= ALIVE_CHECK_PERIODS)
-            {
-                handler->AllMotorAliveCheck();
-                alive_counter = 0;
-            }
+            handler->AllMotorAliveCheck();
+            alive_counter = 0;
+        }
 
-            motor.setOutput();
-            if (handler->sendControlData() != HAL_OK)
-            {
-                motor.controlMode = DJIMotor::RELAX_MODE;
-                motor.currentSet = 0;
-            }
+        motor.setOutput();
+        if (handler->sendControlData() != HAL_OK)
+        {
+            motor.controlMode = DJIMotor::RELAX_MODE;
+            motor.currentSet = 0;
         }
 
         const ULONG now = tx_time_get();
@@ -75,15 +71,12 @@ extern "C" UINT ControlThread_Init(TX_BYTE_POOL *byte_pool)
         return status;
     }
 
-    if constexpr (CONTROL_OUTPUT_ENABLED)
+    if (!CAN_Init())
     {
-        if (!CAN_Init())
-        {
-            (void)tx_byte_release(stack);
-            return TX_NOT_AVAILABLE;
-        }
-        DJIMotorHandler::Instance()->registerMotor(&motor, &hcan1, 0x201U);
+        (void)tx_byte_release(stack);
+        return TX_NOT_AVAILABLE;
     }
+    DJIMotorHandler::Instance()->registerMotor(&motor, &hcan1, 0x201U);
 
     status = tx_thread_create(
         &control_thread,
